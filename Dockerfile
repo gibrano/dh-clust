@@ -22,5 +22,5 @@ RUN apt-get update
 RUN apt-get install -y sbt
 
 RUN mkdir App
-ADD MyApp /usr/spark-2.2.0/App
-RUN cd App && sbt package
+ADD App /usr/spark-2.2.0/App
+# RUN cd App && sbt package
