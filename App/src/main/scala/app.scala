@@ -26,11 +26,15 @@ object App {
     val texts = tweets.collect
     val tdm = TM.termDocumentMatrix(texts)
     
+    var layers = tdm.map(doc => Graph.adjacencyMatrix(doc))
+
+    val jsdMatrix = Divergence.JSDMatrix(layers)
+
+    val clusters = Clusters.Hierarchical(jsdMatrix)
+ 
+    val clustersRdd= sc.parallelize(clusters)   
+    clustersRdd.saveAsTextFile("output")
     
-    
-    val splits = tf.flatMap(line => line.split(" ")).map(word =>(word,1))
-    val counts = splits.reduceByKey((x,y)=>x+y)
-    System.out.println(counts.collect().mkString(", "))
     sc.stop()
   }
 }

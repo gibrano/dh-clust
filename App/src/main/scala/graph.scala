@@ -52,4 +52,17 @@ object Graph {
        return out
     }
 
+    def aggregate(A: Array[org.apache.spark.mllib.linalg.Vector], B: Array[org.apache.spark.mllib.linalg.Vector]): Array[org.apache.spark.mllib.linalg.Vector] = {
+        var n = A.size
+        var out = Array[org.apache.spark.mllib.linalg.Vector]()
+        for( i <- 0 to (n-1)){
+           var x = Vectors.zeros(n)
+           for(j <- 0 to (n-1)){
+               x.toArray(j) = A(i).toArray(j) + B(i).toArray(j)
+           }
+           out = out ++ Array(x)
+        }
+       return out
+    }
+
 }

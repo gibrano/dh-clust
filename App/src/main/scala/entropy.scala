@@ -38,7 +38,7 @@ object Entropy {
           var A = Graph.adjacencyMatrix(C(i))
           H += relative(A)
        }
-       return H
+       return H/(n+1)
     }
 
     def GlobalQuality(C: Array[org.apache.spark.mllib.linalg.Vector], hA: Double): Double = {

@@ -15,5 +15,10 @@ object Divergence {
      var r = Entropy.relative(C)-(1/2)*(Entropy.relative(A)+Entropy.relative(B))
      return r
   }
+
+  def JSDMatrix(C: Array[Array[org.apache.spark.mllib.linalg.Vector]] ) : Array[org.apache.spark.mllib.linalg.Vector] {
+    
+    return distances
+  }
 }
 
