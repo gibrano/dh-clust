@@ -27,6 +27,26 @@ object App {
     val tdm = TM.termDocumentMatrix(texts)
     
     var layers = tdm.map(doc => Graph.adjacencyMatrix(doc))
+    val n = layers.size    
+
+    var coords = Array[Array[Int]](Array[Int]())
+    for( i <- 0 to n-2){
+       for(j <- i+1 to n-1){
+          coords = coords ++ Array(Array(i,j))
+       }
+    }
+    coords = coords.filter(_.size > 0)
+
+    var jsdMatrix = coords.map(x => Divergence.JSDMatrix(x))
+
+    var minimum = jsdMatrix.zipWithIndex.min
+    var newlayer = Graph.aggregate(layers(coords(minimum._2)(0)),layers(coords(minimum._2)(1)))
+    layers = layers.filter(_ != layers(0))
+    layers = layers.filter(_ != layers(1))
+    layers = layers ++ Array(newlayer)
+
+
+    val cpus = Runtime.getRuntime().availableProcessors
 
     val jsdMatrix = Divergence.JSDMatrix(layers)
 

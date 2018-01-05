@@ -16,9 +16,10 @@ object Divergence {
      return r
   }
 
-  def JSDMatrix(C: Array[Array[org.apache.spark.mllib.linalg.Vector]] ) : Array[org.apache.spark.mllib.linalg.Vector] {
-    
-    return distances
+  def JSDMatrix(x: Array[Int]) : Double = {
+    var jsd = JensenShannon(layers(x(0)),layers(x(1)))
+    return jsd
   }
+  
 }
 
