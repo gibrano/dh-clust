@@ -12,14 +12,14 @@ object Divergence {
         }
         C = C ++ Array(x) 
      }
-     var r = Entropy.relative(C)-(1/2)*(Entropy.relative(A)+Entropy.relative(B))
+     var r = Entropy.VonNewmann(C)-(1/2)*(Entropy.VonNewmann(A)+Entropy.VonNewmann(B))
      return r
   }
 
-  def JSDMatrix(x: Array[Int]) : Double = {
+  def computeJSD(x: Array[Int], layers: Array[Array[org.apache.spark.mllib.linalg.Vector]]) : Double = {
     var jsd = JensenShannon(layers(x(0)),layers(x(1)))
     return jsd
   }
-  
+
 }
 

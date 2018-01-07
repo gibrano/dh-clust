@@ -4,7 +4,7 @@ import org.apache.spark.mllib.linalg.{Matrix, Matrices}
 
 object Entropy {
 
-    def relative(A: Array[org.apache.spark.mllib.linalg.Vector]): Double = {
+    def VonNewmann(A: Array[org.apache.spark.mllib.linalg.Vector]): Double = {
         var entropy = 0.00
         var out = 0.00
         val E = Graph.sumAllEntries(A)
@@ -31,18 +31,17 @@ object Entropy {
         return entropy
     }
 
-    def VonNewmann(C: Array[org.apache.spark.mllib.linalg.Vector]): Double = {
+    def relative(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]]): Double = {
        var H = 0.00
-       var n = C.size - 1
+       var n = layers.size - 1
        for(i <- 0 to n){
-          var A = Graph.adjacencyMatrix(C(i))
-          H += relative(A)
+          H += VonNewmann(layers(i))
        }
        return H/(n+1)
     }
 
-    def GlobalQuality(C: Array[org.apache.spark.mllib.linalg.Vector], hA: Double): Double = {
-       var q = 1 - VonNewmann(C)/hA
+    def GlobalQuality(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]], hA: Double): Double = {
+       var q = 1 - relative(layers)/hA
        return q
     }
 
