@@ -1,12 +1,15 @@
-package dh-clust
+package dhclust
 
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.distributed.RowMatrix
 
 object TM {
-  
-  def termDocumentMatrix(texts: Array[String]): Array[org.apache.spark.mllib.linalg.Vector] = {
+
+  def termDocumentMatrix(texts: Array[String], sc: SparkContext): Array[org.apache.spark.mllib.linalg.Vector] = {
     var corpus = sc.parallelize(texts)
     var tokens = corpus.map(x => x.split(" "))
     var dwords = sc.broadcast(tokens.flatMap(token => token).distinct().collect)

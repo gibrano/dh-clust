@@ -1,30 +1,30 @@
-package dh-clust
+package dhclust
 
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.distributed.RowMatrix
 
 object Graph {
-  
+
     def adjacencyMatrix(v: org.apache.spark.mllib.linalg.Vector): Array[org.apache.spark.mllib.linalg.Vector] = {
        val n = v.size - 1
        var A = Array(Vectors.zeros(n+1))
        for( k <- 1 to n){
           A =  A ++ Array(Vectors.zeros(n+1))
        }
-    
+
        var index = Array[Int]()
        for(i <- 0 to n){
           if (v(i) >= 1){
              index = index ++ Array(i)
           }
        }
-    
+
        for(i <- index){
           for(j <- index){
              if (i < j){
                 A(i).toArray(j) = 1
-                A(j).toArray(i) = 1	
+                A(j).toArray(i) = 1
              }
           }
        }
@@ -67,5 +67,5 @@ object Graph {
         }
        return out
     }
-    
+
 }

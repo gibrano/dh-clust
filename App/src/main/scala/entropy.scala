@@ -1,10 +1,16 @@
-package dh-clust
+package dhclust
 
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.linalg.{Matrix, Matrices}
 
 object Entropy {
 
-    def VonNewmann(A: Array[org.apache.spark.mllib.linalg.Vector]): Double = {
+    def VonNewmann(A: Array[org.apache.spark.mllib.linalg.Vector], sc: SparkContext): Double = {
         var entropy = 0.00
         var out = 0.00
         val E = Graph.sumAllEntries(A)
@@ -19,31 +25,30 @@ object Entropy {
                 for(j <- 0 to n){
                    x.toArray(j) = c*(D(i,j) - A(i).toArray(j))
                 }
-                L = L ++ Array(x) 
-            } 
+                L = L ++ Array(x)
+            }
             val rows = sc.parallelize(L)
-            val mat: RowMatrix = new RowMatrix(rows)   
+            val mat: RowMatrix = new RowMatrix(rows)
             var svd = mat.computeSVD(n,false).s
             for(s <- svd.toArray){
                 entropy += -s*math.log(s)
             }
-        } 
+        }
         return entropy
     }
 
-    def relative(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]]): Double = {
+    def relative(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]],sc: SparkContext): Double = {
        var H = 0.00
        var n = layers.size - 1
        for(i <- 0 to n){
-          H += VonNewmann(layers(i))
+          H += VonNewmann(layers(i), sc)
        }
        return H/(n+1)
     }
 
-    def GlobalQuality(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]], hA: Double): Double = {
-       var q = 1 - relative(layers)/hA
+    def GlobalQuality(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]], hA: Double, sc: SparkContext): Double = {
+       var q = 1 - relative(layers, sc)/hA
        return q
     }
 
 }
-
