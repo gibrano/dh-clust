@@ -38,11 +38,12 @@ object Entropy {
     }
 
     def relative(layers: Array[Array[org.apache.spark.mllib.linalg.Vector]],sc: SparkContext): Double = {
-       var H = 0.00
+       //var H = 0.00
        var n = layers.size - 1
-       for(i <- 0 to n){
-          H += VonNewmann(layers(i), sc)
-       }
+       // for(i <- 0 to n){
+       //    H += VonNewmann(layers(i), sc)
+       // }
+       var H = layers.map(C => VonNewmann(C, sc)).reduce((x,y) => x + y)
        return H/(n+1)
     }
 

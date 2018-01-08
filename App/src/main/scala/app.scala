@@ -22,9 +22,6 @@ object App {
 
     val clusters = Clusters.Hierarchical(layers, sc)
 
-    var clustersRDD = sc.parallelize(clusters)
-    clustersRDD.saveAsTextFile("output")
-
     sc.stop()
   }
 }
