@@ -59,6 +59,9 @@ object Graph {
            var x = Vectors.zeros(n)
            for(j <- 0 to (n-1)){
                x.toArray(j) = A(i).toArray(j) + B(i).toArray(j)
+               if(x.toArray(j) > 1){
+                  x.toArray(j) = 1
+               }
            }
            out = out ++ Array(x)
         }

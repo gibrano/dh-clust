@@ -2,7 +2,7 @@ package dh-clust
 
 object Clusters {
   
-  def Hierarchical(C: Array[Array[org.apache.spark.mllib.linalg.Vector]]): org.apache.spark.rdd.RDD[Array[Int]] = {
+  def Hierarchical(C: Array[Array[org.apache.spark.mllib.linalg.Vector]]): Array[Array[Int]] = {
     var layers = C
     var n = layers.size - 1
     var A = layers(0)
@@ -11,12 +11,14 @@ object Clusters {
     }
     val hA = Entropy.VonNewmann(A)
     
-    var q = Array[Double]()
-    var clusters = sc.parallelize(0 to n).map(i => Array(i))
+    
+    var clusters = sc.parallelize(0 to n).map(i => Array(i)).collect
     var aux = clusters
+    
     var globalquality = Entropy.GlobalQuality(layers, hA)
     println(globalquality)
     var max = globalquality
+    var q = Array[Double](globalquality)
     
     while(layers.size > 1){
        var n = layers.size
@@ -39,13 +41,16 @@ object Clusters {
        layers = layers.filter(_ != Cy)
        layers = layers ++ Array(newlayer)
 
-       aux = aux.filter(!_.containsSlice(Cx))
-       aux = aux.filter(!_.containsSlice(Cy))
-       aux = aux ++ sc.parallelize(Array(Array(a,b)))
+       var v1 = aux(a)
+       var v2 = aux(b) 
+       aux = aux.filter(_ != v1)
+       aux = aux.filter(_ != v2)
+       aux = aux.union(Array(v1.union(v2)))
  
        globalquality = Entropy.GlobalQuality(layers, hA)
        println(globalquality)
-       if(globalquality > max){
+
+       if(globalquality >= max){
          max = globalquality
          clusters = aux
        }

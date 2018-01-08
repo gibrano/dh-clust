@@ -4,14 +4,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.mllib.linalg.Matrix
-import org.apache.spark.mllib.linalg.SingularValueDecomposition
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.mllib.linalg.distributed.RowMatrix
-import org.apache.spark.ml.feature.StringIndexer
-import org.apache.spark.mllib.linalg.distributed.{MatrixEntry, CoordinateMatrix}
-import org.apache.spark.mllib.linalg.{Matrix, Matrices}
 
 object App {
   def main(args: Array[String]) {
@@ -23,14 +15,15 @@ object App {
 
     val file = args(0)
     val tweets = sc.textFile(file,2)
-    val texts = tweets.collect
+    val texts = tweets.take(20)
     val tdm = TM.termDocumentMatrix(texts)
 
     var layers = tdm.map(doc => Graph.adjacencyMatrix(doc))
 
     val clusters = Clusters.Hierarchical(layers)
-   
-    clusters.saveAsTextFile("output")
+    
+    var clustersRDD = sc.parallelize(clusters)
+    clustersRDD.saveAsTextFile("output")
     
     sc.stop()
   }
