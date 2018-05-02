@@ -54,27 +54,25 @@ object Decomposition {
     return Array(i,j)
   }
   
-  def vectorProd(x: org.apache.spark.mllib.linalg.Vector, B: Array[org.apache.spark.mllib.linalg.Vector]): org.apache.spark.mllib.linalg.Vector = {
+  def vectorProd(x: org.apache.spark.mllib.linalg.Vector, B: Array[org.apache.spark.mllib.linalg.Vector], sc: SparkContext): org.apache.spark.mllib.linalg.Vector = {
     val n = x.size - 1
     val m = B(0).size - 1
     var sum = 0.0
     var z = Vectors.zeros(m+1)
+    var index = sc.parallelize(0 to n)
     for(i <- 0 to m){
-      sum = 0.0
-      for( j <- 0 to n){
-        sum = sum + x(j)*B(j)(i)
-      }
+      sum = index.map(j => x(j)*B(j)(i)).reduce(_+_)
       z.toArray(i) = sum
     }  
     return z
   }
     
-  def matrixProd(A: Array[org.apache.spark.mllib.linalg.Vector], B: Array[org.apache.spark.mllib.linalg.Vector]): Array[org.apache.spark.mllib.linalg.Vector] = {
+  def matrixProd(A: Array[org.apache.spark.mllib.linalg.Vector], B: Array[org.apache.spark.mllib.linalg.Vector], sc: SparkContext): Array[org.apache.spark.mllib.linalg.Vector] = {
     val n = A.size - 1
     val m = B(0).size - 1
     var C = Array[org.apache.spark.mllib.linalg.Vector]()
     for( i <- 0 to n){
-      var x = vectorProd(A(i), B)
+      var x = vectorProd(A(i), B, sc)
       C = C ++ Array(x)
     }
     return C
@@ -93,17 +91,31 @@ object Decomposition {
     return error
   }
   
-  def eigenValues(A: Array[org.apache.spark.mllib.linalg.Vector]): Array[Double] = {
+  def getEigen(D: Array[org.apache.spark.mllib.linalg.Vector]): Array[Double] = {
+    val n = D.size - 1
+    var values = Array[Double]()
+    var eigenvalues = Array[Double]()
+    for( i <- 0 to n){
+      values = values ++ Array(D(i)(i))
+    }
+    values = values.sorted
+    for( i <- 0 to n){
+      eigenvalues = eigenvalues ++ Array(values(n-i))
+    }
+    return eigenvalues
+  }
+  
+  def eigenValues(A: Array[org.apache.spark.mllib.linalg.Vector], sc: SparkContext): Array[Double] = {
     var D = A
     var err = 1.00
-    while(err < 0.01){
+    while(err > 0.01){
       var x = pivot(D)
       var R = rotation(D,x(0),x(1))
       var Rt = rotation(D,x(0),x(1))
       Rt(x(0)).toArray(x(1)) = -Rt(x(0))(x(1))
       Rt(x(1)).toArray(x(0)) = -Rt(x(1))(x(0))
-      var RtD = matrixProd(Rt, D)
-      D = matrixProd(RtD, R)
+      var RtD = matrixProd(Rt, D, sc)
+      D = matrixProd(RtD, R, sc)
       err = getError(D)
     }
     var v = getEigen(D)
