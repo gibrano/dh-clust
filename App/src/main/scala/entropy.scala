@@ -27,10 +27,8 @@ object Entropy {
                 }
                 L = L ++ Array(x)
             }
-            val rows = sc.parallelize(L)
-            val mat: RowMatrix = new RowMatrix(rows)
-            var svd = mat.computeSVD(n,false).s
-            for(s <- svd.toArray){
+            val eigen = Decomposition.eigenValues(L,sc)
+            for(s <- eigen){
                 entropy += -s*math.log(s)
             }
         }
