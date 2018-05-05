@@ -13,14 +13,16 @@ object App {
     val conf = new SparkConf(true).setAppName("Distributed Hierarchical Clustering")
     val sc = new SparkContext(conf)
 
-    val file = args(0)
-    val tweets = sc.textFile(file,2)
-    val texts = tweets.take(20)
+    val filename = args(0)
+    val tweets = sc.textFile("s3n://AKIAJ3WA6NVC2KBLWPKQ:wBcSpSmfm1uYy1mrvUfRU0m+JyXK3O0FcAMFZyjc@gibran-bucket/tweets/"+filename)
+    val texts = tweets.collect
+    
+    val t1 = System.nanoTime
     val tdm = TM.termDocumentMatrix(texts, sc)
-
     var layers = tdm.map(doc => Graph.adjacencyMatrix(doc))
-
     val clusters = Clusters.Hierarchical(layers, sc)
+    val duration = (System.nanoTime - t1) / 1e9d
+    print("Duration Time:",duration, "Numbers of Cores", sc.getExecutorStorageStatus.length)
 
     sc.stop()
   }
