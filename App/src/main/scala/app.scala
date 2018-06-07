@@ -26,7 +26,6 @@ object App {
     println("Starting clustering ...")
     val t1 = System.nanoTime
     val results = Clusters.Hierarchical(layers, sc)
-    println(clusters.mkString(" "))
     val duration = (System.nanoTime - t1) / 1e9d
     print("Duration Time:",duration, "Numbers of Cores", sc.getExecutorStorageStatus.length)
     sc.parallelize(results).map(i => i.mkString(",")).coalesce(1).saveAsTextFile("s3n://"+sys.env("AWS_ACCESS_KEY_ID")+":"+sys.env("AWS_SECRET_ACCESS_KEY")+"@gibran-bucket/results"+layers.size)
