@@ -21,7 +21,7 @@ object App {
     val tdm = TM.termDocumentMatrix(tweets, sc)
     
     println("Creating layers ...")
--   var layers = sc.parallelize(tdm).map(doc => Graph.adjacencyMatrix(doc)).collect
+    var layers = sc.parallelize(tdm).map(doc => Graph.adjacencyMatrix(doc)).collect
  
     println("Starting clustering ...")
     val t1 = System.nanoTime
